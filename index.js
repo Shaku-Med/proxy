@@ -8,12 +8,11 @@ app.use(express.json());
 
 app.use('/p/*', async (req, res) => {
   try {
-    // Extract the target URL from the path
-    const targetUrl = req.path.slice(3); // Remove the "/p/" part
+    // Extract the target URL from the request path
+    const targetUrl = req.path.slice('/p/'.length); // Remove the "/p/" part
 
-    // Extract the query parameters and append them to the target URL
-    const queryParams = url.format({ query: req.query });
-    const finalUrl = targetUrl + queryParams;
+    // Make sure the target URL is properly formatted
+    const fullUrl = `https://${targetUrl}`;
 
     // Determine the HTTP method and headers
     const method = req.method.toLowerCase();
@@ -23,7 +22,7 @@ app.use('/p/*', async (req, res) => {
     // Make the request using axios
     const axiosConfig = {
       method: method,
-      url: finalUrl,
+      url: fullUrl,
       headers: headers,
       data: req.body // Include the request body for POST/PUT requests
     };
