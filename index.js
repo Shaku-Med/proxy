@@ -13,6 +13,7 @@ app.use(express.urlencoded({ extended: true }));
 app.get("*", async(req, res) => {
     try {
         let u = req.originalUrl.split("/?proxy_med=")[1];
+        res.send(req.originalUrl)
         if (u) {
             let ul = new URL(u);
             let response = await axios.get(u, {
