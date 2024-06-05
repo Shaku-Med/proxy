@@ -12,16 +12,16 @@ app.use(express.urlencoded({ extended: true }));
 // Define a route for proxying requests to a target URL
 app.get("*", async(req, res) => {
     try {
-        let u = req.url.split("/?proxy_med=")[1];
         res.send(req.url)
-            // if (u) {
-            //     let ul = new URL(u);
-            //     let response = await axios.get(u, {
-            //         headers: {
-            //             referer: `${ul.origin}/`,
-            //         },
-            //         responseType: "arraybuffer", // Ensure axios treats the response as binary data
-            //     });
+        let u = req.url.split("/?proxy_med=")[1];
+        // if (u) {
+        //     let ul = new URL(u);
+        //     let response = await axios.get(u, {
+        //         headers: {
+        //             referer: `${ul.origin}/`,
+        //         },
+        //         responseType: "arraybuffer", // Ensure axios treats the response as binary data
+        //     });
 
         //     // Determine Content-Type dynamically based on response headers
         //     let contentType = response.headers["content-type"];
