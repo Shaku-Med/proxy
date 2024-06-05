@@ -41,8 +41,7 @@ app.get("*", async (req, res) => {
       res.status(400).send("Invalid URL");
     }
   } catch (e) {
-    console.error("Error fetching URL:", e);
-    res.status(500).send("Internal Server Error");
+    res.status(404).send("Internal Server Error");
   }
 });
 
