@@ -7,7 +7,7 @@ var Unblocker = require('unblocker');
 var app = express();
 
 // Create Unblocker Instance, and Configure Our Express Server to Use It
-var unblocker = new Unblocker({ prefix: '/proxy/' });
+var unblocker = new Unblocker({ prefix: '/' });
 app.use(unblocker);
 
 app.use("*", (req, res) => {
