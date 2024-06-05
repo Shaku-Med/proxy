@@ -1,42 +1,52 @@
-const express = require('express');
-const axios = require('axios');
+const express = require("express");
+const axios = require("axios");
+const { URL } = require("url"); // Node.js URL module for parsing URLs
 
 const app = express();
+const PORT = process.env.PORT || 3000;
 
+// Middleware to parse JSON and urlencoded request bodies
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-app.use('/p/', async (req, res) => {
+// Define a route for proxying requests to a target URL
+app.get("*", async (req, res) => {
   try {
-    // Extract the target URL from the request path
-    const targetUrl = req.originalUrl.split('/p/')[1];
+    let u = req.originalUrl.split("/?proxy_med=")[1];
+    if (u) {
+      let ul = new URL(u);
+      let response = await axios.get(u, {
+        headers: {
+          referer: `${ul.origin}/`,
+        },
+        responseType: "arraybuffer", // Ensure axios treats the response as binary data
+      });
 
-    // Determine the HTTP method and headers
-    const method = req.method.toLowerCase();
-    const headers = { ...req.headers };
-    delete headers.host; // Remove the host header to avoid conflicts
+      // Determine Content-Type dynamically based on response headers
+      let contentType = response.headers["content-type"];
+      if (contentType.startsWith("image/")) {
+        res.setHeader("Content-Type", contentType); // Set Content-Type header for images
+      } else if (contentType.startsWith("text/html")) {
+        res.setHeader("Content-Type", "text/html"); // Set Content-Type header for HTML
+      } else if (contentType.startsWith("application/javascript")) {
+        res.setHeader("Content-Type", "application/javascript"); // Set Content-Type header for JavaScript
+      } else if (contentType.startsWith("text/css")) {
+        res.setHeader("Content-Type", "text/css"); // Set Content-Type header for CSS
+      } else {
+        res.setHeader("Content-Type", contentType); // Fallback to original Content-Type
+      }
 
-    // Make the request using axios
-    const axiosConfig = {
-      method: method,
-      url: targetUrl, // Use targetUrl directly without prepending 'https://'
-      headers: headers,
-      data: req.body // Include the request body for POST/PUT requests
-    };
-
-    const response = await axios(axiosConfig);
-
-    // Send back the response data
-    res.status(response.status).set(response.headers).send(response.data);
-  } catch (error) {
-    // Handle errors here
-    console.error('Proxy error:', error);
-    const status = error.response ? error.response.status : 500;
-    const message = error.response ? error.response.data : 'Something went wrong.';
-    res.status(status).send(message);
+      res.send(response.data); // Send the data as response
+    } else {
+      res.status(400).send("Invalid URL");
+    }
+  } catch (e) {
+    console.error("Error fetching URL:", e);
+    res.status(500).send("Internal Server Error");
   }
 });
 
-// Start the server on port 3000
-app.listen(3000, () => {
-  console.log('Proxy server is running on http://localhost:3000');
+// Start the server
+app.listen(PORT, () => {
+  console.log(`Proxy server is running on http://localhost:${PORT}`);
 });
