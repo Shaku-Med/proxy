@@ -3,7 +3,7 @@ const axios = require("axios");
 const { URL } = require("url"); // Node.js URL module for parsing URLs
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = 3000;
 
 // Middleware to parse JSON and urlencoded request bodies
 app.use(express.json());
