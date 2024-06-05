@@ -34,7 +34,7 @@ app.use('/p/*', async (req, res) => {
   } catch (error) {
     // Handle errors here
     console.error('Proxy error:', error);
-    const status = error.response ? error.response.status : 500;
+    const status = error.response ? error.response.status : 402;
     const message = error.response ? error.response.data : 'Something went wrong.';
     res.status(status).send(message);
   }
