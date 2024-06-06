@@ -28,7 +28,7 @@ app.get("*", async(req, res) => {
                 headers: {
                     referer: `${ul.origin}/`,
                 },
-                responseType: "arraybuffer", // Ensure axios treats the response as binary data
+                responseType: "arraybuffer",
             });
 
             // Determine Content-Type dynamically based on response headers
