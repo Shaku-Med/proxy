@@ -1,8 +1,17 @@
 const express = require("express");
 const axios = require("axios");
 const { URL } = require("url"); // Node.js URL module for parsing URLs
+const cors = require('cors')
 
 const app = express();
+
+app.use(
+    cors({
+        origin: '*',
+    })
+);
+
+
 const PORT = 3000;
 
 // Middleware to parse JSON and urlencoded request bodies
