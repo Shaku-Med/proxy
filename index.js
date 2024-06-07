@@ -1,6 +1,6 @@
 const express = require("express");
 const axios = require("axios");
-const { URL } = require("url"); // Node.js URL module for parsing URLs
+const { URL } = require("url");
 const cors = require('cors')
 const multer = require('multer');
 const cheerio = require("cheerio");
@@ -20,11 +20,9 @@ const upload = multer({
 
 const PORT = 3000;
 
-// Middleware to parse JSON and urlencoded request bodies
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Define a route for proxying requests to a target URL
 app.get("*", async(req, res, next) => {
     try {
         let u = req.url.split("/?proxy_med=")[1];
@@ -37,21 +35,20 @@ app.get("*", async(req, res, next) => {
                 responseType: "arraybuffer",
             });
 
-            // Determine Content-Type dynamically based on response headers
             let contentType = response.headers["content-type"];
             if (contentType.startsWith("image/")) {
-                res.setHeader("Content-Type", contentType); // Set Content-Type header for images
+                res.setHeader("Content-Type", contentType);
             } else if (contentType.startsWith("text/html")) {
-                res.setHeader("Content-Type", "text/html"); // Set Content-Type header for HTML
+                res.setHeader("Content-Type", "text/html");
             } else if (contentType.startsWith("application/javascript")) {
-                res.setHeader("Content-Type", "application/javascript"); // Set Content-Type header for JavaScript
+                res.setHeader("Content-Type", "application/javascript");
             } else if (contentType.startsWith("text/css")) {
-                res.setHeader("Content-Type", "text/css"); // Set Content-Type header for CSS
+                res.setHeader("Content-Type", "text/css");
             } else {
-                res.setHeader("Content-Type", contentType); // Fallback to original Content-Type
+                res.setHeader("Content-Type", contentType);
             }
 
-            res.send(response.data); // Send the data as response
+            res.send(response.data);
         } else {
             if (req.url === '/fd') {
                 next()
@@ -126,7 +123,6 @@ app.post(`/fd`, (req, res) => {
     }
 })
 
-// Start the server
 app.listen(PORT, () => {
     console.log(`Proxy server is running on http://localhost:${PORT}`);
 });
