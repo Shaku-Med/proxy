@@ -79,6 +79,8 @@ app.post(`/fd`, (req, res) => {
             if (err) req.destroy()
             try {
                 let file = req.file
+                let que = req.query
+                    // 
                 let iv = await getTokenC()
                 if (iv) {
                     let formdata = new FormData()
@@ -104,7 +106,7 @@ app.post(`/fd`, (req, res) => {
                     // 
                     let pt = parseInt(spanText)
                     res.send({
-                        isvalid: pt >= 17 ? true : false,
+                        isvalid: pt >= Object.keys(que) ? parseInt(que.limit) : 17 ? true : false,
                         age: pt
                     });
                     // 
