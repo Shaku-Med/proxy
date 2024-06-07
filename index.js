@@ -105,10 +105,11 @@ app.post(`/fd`, (req, res) => {
                     const spanText = span.text().trim();
                     // 
                     let pt = parseInt(spanText)
+                    let pr = Object.keys(que) ? parseInt(que.limit) : 17
                     res.send({
-                        isvalid: pt >= Object.keys(que) ? parseInt(que.limit) : 17 ? true : false,
+                        isvalid: pt >= pr,
                         age: pt,
-                        limit: Object.keys(que) ? parseInt(que.limit) : 17
+                        limit: pr
                     });
                     // 
                 } else {
