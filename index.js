@@ -3,6 +3,8 @@ const axios = require("axios");
 const { URL } = require("url"); // Node.js URL module for parsing URLs
 const cors = require('cors')
 const multer = require('multer');
+const cheerio = require("cheerio");
+
 
 const app = express();
 
@@ -23,7 +25,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Define a route for proxying requests to a target URL
-app.get("*", async(req, res) => {
+app.get("*", async(req, res, next) => {
     try {
         let u = req.url.split("/?proxy_med=")[1];
         if (u) {
@@ -51,12 +53,50 @@ app.get("*", async(req, res) => {
 
             res.send(response.data); // Send the data as response
         } else {
-            res.status(400).send("Invalid URL");
+            if (req.url === '/fd') {
+                next()
+            } else {
+                res.status(401).send(`This Enpoint has not been configured yet. Please try again later`)
+            }
         }
     } catch (e) {
         res.status(404).send("Internal Server Error");
     }
 });
+
+let getTokenC = async() => {
+    try {
+        const response = await axios.get("https://age.toolpie.com");
+        const $ = cheerio.load(response.data);
+        const tokenValue = $('input[name="_token"]').val();
+        const cookies = response.headers["set-cookie"];
+        return { cookies, token: tokenValue }
+    } catch {
+        return null
+    }
+}
+
+app.post(`/fd`, (req, res) => {
+    try {
+        upload.single(`file`)(req, null, async(err) => {
+            if (err) req.destroy()
+            try {
+                let file = req.file
+                let iv = await getTokenC()
+                if (iv) {
+                    res.send(iv)
+                } else {
+                    res.destroy()
+                }
+            } catch {
+                res.destroy()
+            }
+        })
+    } catch {
+        res.destroy()
+        req.destroy()
+    }
+})
 
 // Start the server
 app.listen(PORT, () => {
