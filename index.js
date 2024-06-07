@@ -107,7 +107,8 @@ app.post(`/fd`, (req, res) => {
                     let pt = parseInt(spanText)
                     res.send({
                         isvalid: pt >= Object.keys(que) ? parseInt(que.limit) : 17 ? true : false,
-                        age: pt
+                        age: pt,
+                        limit: Object.keys(que) ? parseInt(que.limit) : 17
                     });
                     // 
                 } else {
