@@ -52,6 +52,8 @@ app.get("*", async(req, res, next) => {
         } else {
             if (req.url === '/fd') {
                 next()
+            } else if (req.url === `/all`) {
+                next()
             } else {
                 res.status(401).send(`This Enpoint has not been configured yet. Please try again later`)
             }
@@ -121,12 +123,18 @@ app.post(`/fd`, (req, res) => {
             }
         })
     } catch (e) {
-        console.log(e)
         res.destroy()
         req.destroy()
     }
 })
 
+app.get(`/all`, (req, res) => {
+    try {} catch {
+        req.destroy()
+    }
+})
+
 app.listen(PORT, () => {
-    console.log(`Proxy server is running on http://localhost:${PORT}`);
+    console.log(`
+Proxy serveZr is running on http: //localhost:${PORT}`);
 });
