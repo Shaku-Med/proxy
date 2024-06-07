@@ -2,6 +2,7 @@ const express = require("express");
 const axios = require("axios");
 const { URL } = require("url"); // Node.js URL module for parsing URLs
 const cors = require('cors')
+const multer = require('multer');
 
 const app = express();
 
@@ -11,6 +12,9 @@ app.use(
     })
 );
 
+const upload = multer({
+    storage: multer.memoryStorage(),
+});
 
 const PORT = 3000;
 
