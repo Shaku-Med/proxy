@@ -84,15 +84,43 @@ app.post(`/fd`, (req, res) => {
                 let file = req.file
                 let iv = await getTokenC()
                 if (iv) {
-                    res.send(iv)
+                    let formdata = new FormData()
+                    formdata.append('picture', new Blob([file.buffer]), { filename: file.originalname });
+                    formdata.append('_token', iv.token)
+                        // 
+                    const axiosConfig = {
+                        Cookie: iv.cookies.join('; '),
+                        'referer': 'https://age.toolpie.com/',
+                        // 'origin': 'https://age.toolpie.com',
+                    };
+                    const response = await fetch(`https://age.toolpie.com`, {
+                        method: `POST`,
+                        body: formdata,
+                        headers: axiosConfig
+                    })
+
+                    const html = await response.text();
+                    const $ = cheerio.load(html);
+                    const h5 = $('h5.text-center.mb-0');
+                    const span = h5.find('span.text-warning.font-weight-bold');
+                    const spanText = span.text().trim();
+                    // 
+                    let pt = parseInt(spanText)
+                    res.send({
+                        isvalid: pt >= 17 ? true : false,
+                        age: pt
+                    });
+                    // 
                 } else {
                     res.destroy()
                 }
-            } catch {
-                res.destroy()
+            } catch (e) {
+                console.log(e)
+                res.send(e)
             }
         })
-    } catch {
+    } catch (e) {
+        console.log(e)
         res.destroy()
         req.destroy()
     }
