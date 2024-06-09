@@ -309,7 +309,9 @@ let scrape = async(req, res) => {
 
         let browser;
         try {
-            browser = await puppeteer.launch();
+            browser = await puppeteer.launch({
+                executablePath: process.env.NODE_ENV === 'production' ? `/usr/bin/chromium-browser` : puppeteer.executablePath()
+            });
             const page = await browser.newPage();
             await page.goto(targetUrl, { waitUntil: 'networkidle2' });
             const content = await page.content();
