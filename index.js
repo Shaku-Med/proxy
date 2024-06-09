@@ -328,7 +328,7 @@ let scrape = async(req, res) => {
 }
 
 
-app.get('/all/*', async(req, res) => {
+app.get('/all/*', async (req, res) => {
     try {
         let qs = req.url
         if (!qs.toLowerCase().includes('/all/?')) {
@@ -341,7 +341,7 @@ app.get('/all/*', async(req, res) => {
                 let browser;
                 try {
 
-                    let LunchMeny = async(hasloop) => {
+                    let LunchMeny = async (hasloop) => {
                         browser = await puppeteer.launch({ headless: true });
                         const page = await browser.newPage();
                         await page.goto(targetUrl, { waitUntil: 'networkidle2' });
@@ -360,13 +360,13 @@ app.get('/all/*', async(req, res) => {
                         await page.waitForNetworkIdle()
 
                         // const screenshot = await page.screenshot({ path: `File/${new Date().getTime()}_video_screenshot.png` });
-                        setTimeout(async() => {
+                        setTimeout(async () => {
                             LunchMeny(true)
                             await browser.close()
                         }, 2000)
                         if (!hasloop) {
                             res.send({ message: `Attact started`, state: `Pushing Plays, Check the post for updates.` })
-                        } else {}
+                        } else { }
                     };
 
                     LunchMeny()
@@ -387,12 +387,12 @@ app.get('/all/*', async(req, res) => {
                 let browser;
                 try {
 
-                    let LunchMeny = async(hasloop) => {
+                    let LunchMeny = async (hasloop) => {
                         browser = await puppeteer.launch({ headless: true });
                         const page = await browser.newPage();
                         await page.goto(targetUrl, { waitUntil: 'networkidle2' });
 
-                        setTimeout(async() => {
+                        setTimeout(async () => {
                             LunchMeny(true)
                             await browser.close()
                         }, 2000)
@@ -417,21 +417,23 @@ app.get('/all/*', async(req, res) => {
                 let u = new URL(targetUrl)
                 if (u) {
                     if (u.hostname.toLowerCase().includes('facebook.com')) {
-                        let iv = await getFbdownload(targetUrl)
-                        if (iv) {
-                            Fdown(req, res, iv)
-                        } else {
-                            req.destroy()
-                        }
-                    } else if (u.hostname.toLowerCase().includes('youtube.com')) {
-                        let iv = await getYtD(targetUrl, u.searchParams.get('v'))
-                        if (iv) {
-                            Ydown(req, res, iv, u.searchParams.get('v'))
+                            let iv = await getFbdownload(targetUrl)
+                            if (iv) {
+                                Fdown(req, res, iv)
+                            } else {
+                                req.destroy()
+                            }
+                    }
+                    // else if (u.hostname.toLowerCase().includes('youtube.com')) {
+                    //     let iv = await getYtD(targetUrl, u.searchParams.get('v'))
+                    //     if (iv) {
+                    //         Ydown(req, res, iv, u.searchParams.get('v'))
 
-                        } else {
-                            req.destroy()
-                        }
-                    } else if (u.hostname.toLowerCase().includes('soundcloud.com')) {
+                    //     } else {
+                    //         req.destroy()
+                    //     }
+                    // }
+                    else if (u.hostname.toLowerCase().includes('soundcloud.com')) {
                         let iv = await getSCL(targetUrl)
                         if (iv) {
                             SLDown(req, res, iv)
@@ -448,7 +450,7 @@ app.get('/all/*', async(req, res) => {
                         TkDown(req, res, iv)
                     }
                 } else {
-                    res.status(409).send({status: 'died', message: `Your request died, due to an invalid URL. check your link and try again.`})
+                    res.status(409).send({ status: 'died', message: `Your request died, due to an invalid URL. check your link and try again.` })
                 }
             }
         } else {
