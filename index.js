@@ -462,5 +462,5 @@ app.get('/all/*', async (req, res) => {
 });
 
 app.listen(PORT, () => {
-    console.log(`Proxy server is running on http: //localhost:${PORT}`);
+    console.log(`Scann is ready.`);
 });
