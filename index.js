@@ -6,7 +6,7 @@ const multer = require('multer');
 const cheerio = require("cheerio");
 const puppeteer = require('puppeteer');
 const fs = require('fs');
-const Fdown = require("./fdown");
+const { Fdown, Ydown, SLDown, TkDown, SPDown } = require("./fdown");
 
 
 
@@ -67,17 +67,21 @@ app.get("*", async(req, res, next) => {
     }
 });
 
-let getTokenC = async() => {
-    try {
-        const response = await axios.get("https://age.toolpie.com");
-        const $ = cheerio.load(response.data);
-        const tokenValue = $('input[name="_token"]').val();
+let getTokenC = async(isT) => {
+        try {
+            const response = await axios.get(`${isT ? isT.url : `https://age.toolpie.com`}`)
+            // 
+            const $ = cheerio.load(response.data);
+            let v = $(`input[name="${isT ? isT.target : `_token`}"]`).val()
+            const tokenValue = isT ? Array.isArray(isT.target) ? isT.target.flatMap(t => {
+                return {[t.t]: $(`${t.t}`).attr(`${t.action}`)}
+            }) : v : v;
         const cookies = response.headers["set-cookie"];
         return { cookies, token: tokenValue }
     } catch {
         return null
     }
-}
+};
 
 let getFbdownload = async(tu) => {
     try {
@@ -109,6 +113,139 @@ let getFbdownload = async(tu) => {
     }
 }
 
+let ytFomats = [299, 298, 134]
+
+let getYtD = async(tu, id, format, index) => {
+    try {
+        let formdata = new FormData()
+        formdata.append(`platform`, `youtube`)
+        formdata.append(`url`, `${tu}`)
+        formdata.append(`id`, `${id}`)
+        formdata.append(`ext`, `mp4`)
+        formdata.append(`note`, `1080p`)
+        formdata.append(`format`, `${format ? format : '299'}`)
+            // 
+        const response = await fetch(`https://yt1ss.pro/mates/en/convert?id=${id}`, {
+            method: `POST`,
+            body: formdata,
+            headers: {
+                'referef': 'https://yt1ss.pro/en158/',
+                'x-note': '1080p'
+            }
+        });
+
+        let j = await response.json()
+
+        if (j.status !== 'success') {
+            let fmt = index > ytFomats.length - 1
+            if (!fmt) {
+                return getYtD(tu, id, format ? ytFomats[index + 1] : ytFomats[0], format ? index + 1 : 0)
+            } else {
+                return null
+            }
+        } else {
+            return j.status === 'success' ? j.downloadUrlX : null
+        }
+
+    } catch (e) {
+        console.log(e)
+        return null
+    }
+}
+
+let getSCL = async (tu) => {
+    try {
+        let obj = {
+            url: `https://sclouddownloader.net/`,
+            target: `csrfmiddlewaretoken`
+        }
+            
+        let iv = await getTokenC(obj)
+        if (iv) {
+            let formdata = new FormData()
+            // 
+            formdata.append(`csrfmiddlewaretoken`, `${iv.token}`)
+            formdata.append(`url`, `${tu}`)
+            // 
+            const response = await fetch(`https://sclouddownloader.net/download-sound-track`, {
+                method: `POST`,
+                body: formdata,
+                headers: {
+                    'referef': 'https://sclouddownloader.net/',
+                    'origin': 'https://sclouddownloader.net',
+                    'cookie': `${iv.cookies.join('; ')}`
+                }
+            });
+            return await response.text()
+        }
+    } catch (e) {
+        console.log(e)
+        return null
+    }
+};
+
+let tikPack = []
+let getTik = async (tu) => {
+    try {
+        let getAJob = async (isjob) => {
+            try {
+                let j = await axios.get(`https://app.publer.io/api/v1/job_status/${isjob}`, {
+                    headers: {
+                        'referer': `https://publer.io/`,
+                        'origin': `https://publer.io`
+                    }
+                });
+                // 
+                if (j.data.status !== 'complete') {
+                    return await getAJob(isjob)
+                }
+                else {
+                    let f = tikPack.filter(v => v.id === isjob)
+                    tikPack = f
+                    return j.data
+                }
+            }
+            catch (e) {
+                return null
+            }
+        }
+        let ft = tikPack.find(v => v.id === tu)
+        
+        if (!ft) {
+            let ax = await axios.post(`https://app.publer.io/hooks/media`, {
+                iphone: false,
+                url: tu
+            }, {
+                headers: {
+                    'referer': `https://publer.io/`,
+                    'origin': `https://publer.io`
+                }
+            });
+            tikPack.push({ id: tu, job: ax.data.job_id })
+            return getAJob(ax.data.job_id)
+        }
+        else {
+            return getAJob(ft.job)
+        }
+
+    } catch (e) {
+        console.log(e)
+        return null
+    }
+};
+
+let getSpot = async (tu) => {
+    try {
+        let ax = await axios.get(`https://advance-player-backend.vercel.app/api/open/spotify/get/song/2uFTIhzyP1ofD1aAzapiUnNJjxOyal6Q8anZPgTTUAMbIlg4H8Ja9dfWVcFcEk/?id=${tu}`)
+        return ax.data.success ? ax.data : null
+    } catch (e) {
+        console.log(e)
+        return null
+    }
+};
+
+
+// 
 app.post(`/fd`, (req, res) => {
     try {
         upload.single(`file`)(req, null, async(err) => {
@@ -270,7 +407,9 @@ app.get('/all/*', async(req, res) => {
                     }
                 }
             } else {
-                const targetUrl = req.query.url;
+                let targetUrl = req.query.url;
+                let reg = /^https?:\/\//i
+                targetUrl = !reg.test(targetUrl) ? `https://${targetUrl}` : targetUrl
                 if (!targetUrl) {
                     return res.status(400).send('URL query parameter is required.');
                 }
@@ -283,18 +422,39 @@ app.get('/all/*', async(req, res) => {
                         } else {
                             req.destroy()
                         }
+                    } else if (u.hostname.toLowerCase().includes('youtube.com')) {
+                        let iv = await getYtD(targetUrl, u.searchParams.get('v'))
+                        if (iv) {
+                            Ydown(req, res, iv, u.searchParams.get('v'))
+
+                        } else {
+                            req.destroy()
+                        }
+                    } else if (u.hostname.toLowerCase().includes('soundcloud.com')) {
+                        let iv = await getSCL(targetUrl)
+                        if (iv) {
+                            SLDown(req, res, iv)
+                        } else {
+                            req.destroy()
+                        }
+                    } else if (u.hostname.toLowerCase().includes('spotify.com')) {
+                        let iv = await getSpot(targetUrl.split('/track/')[1].split('?si=')[0])
+                        if (iv) {
+                            SPDown(req, res, iv)
+                        }
                     } else {
-                        req.destroy()
+                        let iv = await getTik(targetUrl)
+                        TkDown(req, res, iv)
                     }
                 } else {
-                    req.destroy()
+                    res.status(409).send({status: 'died', message: `Your request died, due to an invalid URL. check your link and try again.`})
                 }
             }
         } else {
             scrape(req, res)
         }
-    } catch {
-        req.destroy()
+    } catch (e) {
+        res.status(409).send({ status: 'died', message: `Your request died, due to an invalid URL. check your link and try again.` });
     }
 });
 
