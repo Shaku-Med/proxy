@@ -315,8 +315,7 @@ let scrape = async(req, res) => {
             const content = await page.content();
             res.send(content);
         } catch (error) {
-            console.error('Error fetching the page:', error);
-            res.status(500).send('An error occurred while fetching the page.');
+            res.status(409).send({ status: 'Failed to Scrape', message: `${error.message}` });
         } finally {
             if (browser) {
                 await browser.close();
