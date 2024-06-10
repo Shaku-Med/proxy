@@ -8,6 +8,8 @@ const puppeteer = require('puppeteer');
 const fs = require('fs');
 const { Fdown, Ydown, SLDown, TkDown, SPDown } = require("./fdown");
 require('dotenv').config()
+const { PassThrough } = require('stream')
+const https = require('https')
 
 
 const app = express();
@@ -32,23 +34,29 @@ app.get("*", async(req, res, next) => {
         let u = req.url.split("/?proxy_med=")[1];
         if (u) {
             let ul = new URL(u);
-            let response = await fetch(u, {
+            let protocolHandler = ul.protocol === 'https:' ? https : http;
+
+            let options = {
                 method: 'GET',
                 headers: {
                     referer: `${ul.origin}/`,
                     origin: `${ul.origin}`
                 },
+            };
+
+            protocolHandler.get(u, options, (response) => {
+                if (response.statusCode !== 200) {
+                    res.status(response.statusCode).send(`Error: ${response.statusMessage}`);
+                    return;
+                }
+
+                let contentType = response.headers['content-type'];
+                res.setHeader('Content-Type', contentType.includes('stream') ? 'video/mp4' : contentType);
+
+                let passThrough = new PassThrough();
+                response.pipe(passThrough);
+                passThrough.pipe(res);
             });
-
-            if (!response.ok) {
-                res.status(response.status).send(`Error: ${response.statusText}`);
-                return;
-            }
-
-            let rsp = await response.arrayBuffer();
-            res.setHeader('Content-Type', response.headers.get('content-type'));
-            let buf = Buffer.from(rsp);
-            res.send(buf);
         } else {
             if (req.url === '/fd') {
                 next()
