@@ -25,11 +25,22 @@ let SLDown = (req, res, iv) => {
         req.destroy()
     }
 };
-let TkDown = (req, res, iv) => {
+let TkDown = async(req, res, iv) => {
     try {
         if (iv) {
-            res.send(iv.payload.flatMap(v => {
-                return { link: v.path, type: v.type }
+            let getStream = async(v) => {
+                try {
+                    let ux = await fetch(v)
+                    let ty = await ux.arrayBuffer()
+                    let buf = Buffer.from(ty)
+                    return buf
+                } catch (e) {
+                    console.log(e)
+                    return null
+                }
+            }
+            res.send(iv.payload.flatMap(async v => {
+                return { link: v.path, type: v.type, stream: await getStream(v.path) }
             }))
         } else {
             req.destroy()

@@ -32,27 +32,23 @@ app.get("*", async(req, res, next) => {
         let u = req.url.split("/?proxy_med=")[1];
         if (u) {
             let ul = new URL(u);
-            let response = await axios.get(u, {
+            let response = await fetch(u, {
+                method: 'GET',
                 headers: {
                     referer: `${ul.origin}/`,
+                    origin: `${ul.origin}`
                 },
-                responseType: "arraybuffer",
             });
 
-            let contentType = response.headers["content-type"];
-            if (contentType.startsWith("image/")) {
-                res.setHeader("Content-Type", contentType);
-            } else if (contentType.startsWith("text/html")) {
-                res.setHeader("Content-Type", "text/html");
-            } else if (contentType.startsWith("application/javascript")) {
-                res.setHeader("Content-Type", "application/javascript");
-            } else if (contentType.startsWith("text/css")) {
-                res.setHeader("Content-Type", "text/css");
-            } else {
-                res.setHeader("Content-Type", contentType);
+            if (!response.ok) {
+                res.status(response.status).send(`Error: ${response.statusText}`);
+                return;
             }
 
-            res.send(response.data);
+            let rsp = await response.arrayBuffer();
+            res.setHeader('Content-Type', response.headers.get('content-type'));
+            let buf = Buffer.from(rsp);
+            res.send(buf);
         } else {
             if (req.url === '/fd') {
                 next()
@@ -63,6 +59,7 @@ app.get("*", async(req, res, next) => {
             }
         }
     } catch (e) {
+        console.log(e)
         res.status(404).send("Internal Server Error");
     }
 });
@@ -363,7 +360,7 @@ app.get('/all/*', async (req, res) => {
                         setTimeout(async () => {
                             LunchMeny(true)
                             await browser.close()
-                        }, 2000)
+                        }, 50)
                         if (!hasloop) {
                             res.send({ message: `Attact started`, state: `Pushing Plays, Check the post for updates.` })
                         } else { }
