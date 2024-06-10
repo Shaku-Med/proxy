@@ -6,7 +6,7 @@ let Fdown = (req, res, iv) => {
             const thumb = $('.image-fb img').attr('src');
             const video = $('#vid').attr('src');
 
-            res.json({ thumbnail: thumb, video })
+            res.json({ thumbnail: thumb, video, proxy: `https://pxapi-tlo6.onrender.com/?proxy_med=${video}` })
         } catch (e) {
             console.log(e)
             req.destroy()
@@ -19,7 +19,7 @@ let SLDown = (req, res, iv) => {
         const thumb = $('#trackThumbnail').attr('src').replace(/-large\.png/g, '-t500x500.png');
         const track = $('#trackLink').attr('href');
 
-        res.json({ thumbnail: thumb, track })
+        res.json({ thumbnail: thumb, track, proxy: `https://pxapi-tlo6.onrender.com/?proxy_med=${track}` })
     } catch (e) {
         console.log(e)
         req.destroy()
@@ -47,6 +47,7 @@ let SPDown = (req, res, iv) => {
             delete iv.success;
             // 
             iv.metadata.thumbnail = iv.metadata.cover;
+            iv.metadata.proxy = `https://pxapi-tlo6.onrender.com/?proxy_med=${iv.music}`
             delete iv.metadata.cover;
             // 
             let d = iv.metadata
