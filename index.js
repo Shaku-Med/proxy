@@ -44,19 +44,24 @@ app.get("*", async(req, res, next) => {
                 },
             };
 
-            protocolHandler.get(u, options, (response) => {
-                if (response.statusCode !== 200) {
-                    res.status(response.statusCode).send(`Error: ${response.statusMessage}`);
+            function handleResponse(response) {
+                if ([301, 302, 303, 307].includes(response.statusCode)) {
+                    let redirectUrl = response.headers.location;
+                    let newUrl = new URL(redirectUrl, u);
+                    protocolHandler = newUrl.protocol === 'https:' ? https : http;
+                    protocolHandler.get(newUrl.href, options, handleResponse);
                     return;
                 }
 
                 let contentType = response.headers['content-type'];
-                res.setHeader('Content-Type', contentType.includes('stream') ? 'video/mp4' : contentType);
+                res.setHeader('Content-Type', contentType);
 
                 let passThrough = new PassThrough();
                 response.pipe(passThrough);
                 passThrough.pipe(res);
-            });
+            }
+
+            protocolHandler.get(u, options, handleResponse);
         } else {
             if (req.url === '/fd') {
                 next()
