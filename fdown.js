@@ -29,7 +29,7 @@ let TkDown = (req, res, iv) => {
     try {
         if (iv) {
             res.send(iv.payload.flatMap(v => {
-                return { link: v.path, type: v.type }
+                return { link: v.path, type: v.type, proxy: `https://pxapi-tlo6.onrender.com/?proxy_med=${v.path}` }
             }))
         } else {
             req.destroy()
