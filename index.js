@@ -45,7 +45,7 @@ app.get("*", async(req, res, next) => {
             };
 
             function handleResponse(response) {
-                if ([301, 302, 303, 307, 503].includes(response.statusCode)) {
+                if ([301, 302, 303, 307].includes(response.statusCode)) {
                     let redirectUrl = response.headers.location;
                     let newUrl = new URL(redirectUrl, u);
                     protocolHandler = newUrl.protocol === 'https:' ? https : http;
