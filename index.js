@@ -558,6 +558,7 @@ app.get("/all/*", async (req, res) => {
                             SPDown(req, res, iv);
                         }
                     } else {
+                        targetUrl = targetUrl.split(`&ab_channel=`)[0];
                         let iv = await getTik(targetUrl);
                         TkDown(req, res, iv);
                     }
