@@ -65,7 +65,7 @@ app.get("*", async (req, res, next) => {
                 passThrough.pipe(res);
             }
 
-            if (decodeURIComponent(req.url).includes(`<>`)) {
+            if (req.url.includes(`<>`)) {
                 let ax = await axios.get(u, {
                     ...options,
                     responseType: "arraybuffer",
