@@ -47,7 +47,7 @@ let SPDown = (req, res, iv) => {
             delete iv.success;
             // 
             iv.metadata.thumbnail = iv.metadata.cover;
-            // iv.metadata.proxy = `https://pxapi-tlo6.onrender.com/?proxy_med=${iv.music}`
+            iv.metadata.proxy = `https://pxapi-tlo6.onrender.com/?proxy_med=${iv.music}`
             delete iv.metadata.cover;
             // 
             let d = iv.metadata
