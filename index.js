@@ -10,6 +10,7 @@ const { Fdown, Ydown, SLDown, TkDown, SPDown } = require("./fdown");
 require("dotenv").config();
 const { PassThrough } = require("stream");
 const https = require("https");
+const http = require("http");
 
 const app = express();
 
@@ -32,8 +33,9 @@ app.get("*", async (req, res, next) => {
     try {
         let u = req.url.split("/?proxy_med=")[1];
         if (u) {
-            u = decodeURIComponent(u);
-            u = u.split("<>")[0];
+            // u = decodeURIComponent(u);
+            u = u.replace(/<>+/g, "");
+            // //
             let ul = new URL(u);
             let protocolHandler = ul.protocol === "https:" ? https : http;
 
@@ -57,7 +59,7 @@ app.get("*", async (req, res, next) => {
 
                 let contentType = response.headers["content-type"];
                 res.setHeader("Content-Type", contentType);
-
+                //
                 let passThrough = new PassThrough();
                 response.pipe(passThrough);
                 passThrough.pipe(res);
@@ -69,7 +71,7 @@ app.get("*", async (req, res, next) => {
                     responseType: "arraybuffer",
                 });
                 let data = ax.data;
-                let buf = new Buffer.from(data);
+                // let buf = new Buffer.from(data);
                 let contentType = ax.headers["content-type"];
 
                 if (contentType && contentType.includes("text/html")) {
@@ -122,7 +124,6 @@ app.get("*", async (req, res, next) => {
             }
         }
     } catch (e) {
-        console.log(e);
         res.status(404).send("Internal Server Error");
     }
 });
