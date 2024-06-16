@@ -34,7 +34,9 @@ app.get("*", async (req, res, next) => {
         let u = req.url.split("/?proxy_med=")[1];
         if (u) {
             // u = decodeURIComponent(u);
-            u = u.replace(/<>+/g, "");
+            u = u.includes("%")
+                ? decodeURIComponent(u).replace(/<>+/g, "")
+                : u.replace(/<>+/g, "");
             // //
             let ul = new URL(u);
             let protocolHandler = ul.protocol === "https:" ? https : http;
@@ -65,7 +67,7 @@ app.get("*", async (req, res, next) => {
                 passThrough.pipe(res);
             }
 
-            if (req.url.includes(`<>`)) {
+            if (req.url.includes(`%`)) {
                 let ax = await axios.get(u, {
                     ...options,
                     responseType: "arraybuffer",
@@ -124,6 +126,7 @@ app.get("*", async (req, res, next) => {
             }
         }
     } catch (e) {
+        console.log(e);
         res.status(404).send("Internal Server Error");
     }
 });
