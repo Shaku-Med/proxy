@@ -71,10 +71,12 @@ app.get("*", async (req, res, next) => {
                 let ax = await axios.get(u, {
                     ...options,
                     responseType: "arraybuffer",
+                    maxRedirects: 100,
                 });
                 let data = ax.data;
                 // let buf = new Buffer.from(data);
                 let contentType = ax.headers["content-type"];
+                let finalUrl = ax.request.res.responseUrl;
 
                 if (contentType && contentType.includes("text/html")) {
                     const $ = cheerio.load(data);
@@ -88,12 +90,12 @@ app.get("*", async (req, res, next) => {
                             if (url) {
                                 let absoluteUrl;
                                 if (url.startsWith("/")) {
-                                    absoluteUrl = `${ul.origin}${url}`;
+                                    absoluteUrl = `${new URL(finalUrl).origin}${url}`;
                                 } else if (
                                     !url.startsWith("http") &&
                                     !url.startsWith("//")
                                 ) {
-                                    absoluteUrl = `${ul.href}${url}`;
+                                    absoluteUrl = `${new URL(finalUrl).href}${url}`;
                                 } else {
                                     absoluteUrl = url;
                                 }
