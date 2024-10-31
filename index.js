@@ -60,7 +60,7 @@ app.get("*", async (req, res, next) => {
                     return;
                 }
 
-                let contentType = response.headers["content-type"];
+                let contentType = (response.headers["content-type"] || 'text/html');
                 res.setHeader("Content-Type", contentType);
                 //
                 let passThrough = new PassThrough();
@@ -132,7 +132,7 @@ app.get("*", async (req, res, next) => {
             }
         }
     } catch (e) {
-        // console.log(e);
+        console.log(e);
         res.status(404).send("Internal Server Error");
     }
 });
@@ -562,15 +562,30 @@ app.get("/all/*", async (req, res) => {
                         u.hostname.toLowerCase().includes("spotify.com")
                     ) {
                         let iv = await getSpot(
-                            targetUrl.split("/track/")[1].split("?si=")[0],
+                            targetUrl?.split("/track/")[1]?.split("?si=")[0],
                         );
                         if (iv) {
                             SPDown(req, res, iv);
                         }
+                        else {
+                            res.status(404).send({
+                                message: `Target Not Found!`,
+                                status: 404
+                            })
+                        }
                     } else {
-                        targetUrl = targetUrl.split(`&ab_channel=`)[0];
-                        let iv = await getTik(targetUrl);
-                        TkDown(req, res, iv);
+                        targetUrl = targetUrl?.split(`&ab_channel=`)[0];
+                        if(targetUrl){
+                            let iv = await getTik(targetUrl);
+                            TkDown(req, res, iv);
+
+                        }
+                        else {
+                            res.status(404).send({
+                                message: `Target Not Found!`,
+                                status: 404
+                            })
+                        }
                     }
                 } else {
                     res.status(409).send({
@@ -583,6 +598,7 @@ app.get("/all/*", async (req, res) => {
             scrape(req, res);
         }
     } catch (e) {
+        console.log(e)
         res.status(409).send({
             status: "died",
             message: `Your request died, due to an invalid URL. check your link and try again.`,
