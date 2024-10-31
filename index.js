@@ -39,6 +39,7 @@ app.get("*", async (req, res, next) => {
                     ? decodeURIComponent(u).replace(/<>+/g, "")
                     : u.replace(/<>+/g, "");
             // //
+            u = decodeURIComponent(u)
             let ul = new URL(u);
             let protocolHandler = ul.protocol === "https:" ? https : http;
 
