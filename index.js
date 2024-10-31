@@ -133,7 +133,7 @@ app.get("*", async (req, res, next) => {
         }
     } catch (e) {
         console.log(e);
-        res.status(404).send("Internal Server Error");
+        res.status(404).send(`Internal Server Error: \n`, e);
     }
 });
 
