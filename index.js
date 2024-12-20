@@ -121,8 +121,18 @@ app.get("*", async (req, res, next) => {
                 res.setHeader("Content-Type", contentType || "text/html");
                 res.send(data);
             } else {
-                // let dc = decodeURI
-                u = decodeURI(u)
+                if(!u?.includes('https://') && !u?.includes('http://')){
+                    let dc = new URL(decodeURIComponent(u))
+                    let origin = dc.origin
+                    let pth = dc.pathname
+                    let sq = dc.search.split(`=`)[0]
+                    let combine = `${origin}${pth}${sq}=`
+                    let mpt = u.split(`${encodeURIComponent(combine)}`)[1]
+                    u = `${combine}${mpt}`
+                }
+                else {
+                    u = u
+                }
                 protocolHandler.get(u, options, handleResponse);
             }
         } else {
