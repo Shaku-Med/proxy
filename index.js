@@ -69,6 +69,7 @@ app.get("*", async (req, res, next) => {
                 passThrough.pipe(res);
             }
 
+            u = (u?.includes('node') ? req.url.split("/?proxy_med=")[1] : u || u)
             
             if (
                 req.url.includes(`%`) &&
@@ -120,7 +121,9 @@ app.get("*", async (req, res, next) => {
                 res.setHeader("Content-Type", contentType || "text/html");
                 res.send(data);
             } else {
-                u = decodeURIComponent(req.url.split("/?proxy_med=")[1])
+                // let ul = new URL(req.url.split("/?proxy_med=")[1])
+                // let lm = ul.search.split('=')[0]
+                // u = u?.includes('%') ? `${ul.protocol}//${ul.host}${ul.pathname}${lm}=${ul.searchParams.get(`${lm.split('?')[1]}`)}` : u
                 protocolHandler.get(u, options, handleResponse);
             }
         } else {
