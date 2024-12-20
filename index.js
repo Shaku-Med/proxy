@@ -69,6 +69,7 @@ app.get("*", async (req, res, next) => {
                 passThrough.pipe(res);
             }
 
+            
             if (
                 req.url.includes(`%`) &&
                 decodeURIComponent(req.url).includes("<>")
@@ -119,6 +120,7 @@ app.get("*", async (req, res, next) => {
                 res.setHeader("Content-Type", contentType || "text/html");
                 res.send(data);
             } else {
+                u = req.url.split("/?proxy_med=")[1]
                 protocolHandler.get(u, options, handleResponse);
             }
         } else {
