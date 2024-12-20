@@ -570,7 +570,7 @@ app.get("/all/*", async (req, res) => {
                         }
                         else {
                             res.status(404).send({
-                                message: `Target Not Found!`,
+                                message: `Failed to find target. Try again!`,
                                 status: 404
                             })
                         }
