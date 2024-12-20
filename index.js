@@ -120,8 +120,8 @@ app.get("*", async (req, res, next) => {
                 res.setHeader("Content-Type", contentType || "text/html");
                 res.send(data);
             } else {
-                
-                protocolHandler.get(req.url.split("/?proxy_med=")[1], options, handleResponse);
+                u = decodeURIComponent(req.url.split("/?proxy_med=")[1])
+                protocolHandler.get(u, options, handleResponse);
             }
         } else {
             if (req.url === "/fd") {
